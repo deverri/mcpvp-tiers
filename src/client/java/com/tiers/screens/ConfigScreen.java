@@ -8,6 +8,7 @@ import com.tiers.profile.PlayerProfile;
 import com.tiers.profile.Status;
 import com.tiers.profile.types.MCTiersProfile;
 import com.tiers.profile.types.PvPTiersProfile;
+import com.tiers.profile.types.MCPVPProfile;
 import com.tiers.profile.types.SubtiersProfile;
 import com.tiers.textures.ColorControl;
 import com.tiers.textures.Icons;
@@ -64,6 +65,9 @@ public class ConfigScreen extends Screen {
     private Button leftSubtiers;
     private Button centerSubtiers;
     private Button rightSubtiers;
+    private Button leftMCPVP;
+    private Button centerMCPVP;
+    private Button rightMCPVP;
     private Button activeRightMode;
     private Button activeLeftMode;
     private Button enableOwnProfile;
@@ -108,9 +112,12 @@ public class ConfigScreen extends Screen {
 
         graphics.centeredText(font, useOwnProfile ? ownProfile.getFullName() : defaultProfile.getFullName(), centerX, height - (int) (height / 4.166) - height / 54 - 12, CommonColors.WHITE);
 
-        graphics.blit(RenderPipelines.GUI_TEXTURED, MCTiersProfile.MCTIERS_IMAGE, centerX - 120 - 64, distance + 110 + 4, 0, 0, 128, 24, 128, 24);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, PvPTiersProfile.PVPTIERS_IMAGE, centerX - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, SubtiersProfile.SUBTIERS_IMAGE, centerX + 120 - 15, distance + 110, 0, 0, 30, 30, 30, 30);
+        int mcTiersLogoWidth = Math.min(128, columnSpacing() - 6);
+        int mcTiersLogoHeight = mcTiersLogoWidth * 24 / 128;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, MCTiersProfile.MCTIERS_IMAGE, columnX(0) - mcTiersLogoWidth / 2, distance + 110 + 4 + (24 - mcTiersLogoHeight) / 2, 0, 0, mcTiersLogoWidth, mcTiersLogoHeight, mcTiersLogoWidth, mcTiersLogoHeight);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, PvPTiersProfile.PVPTIERS_IMAGE, columnX(1) - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SubtiersProfile.SUBTIERS_IMAGE, columnX(2) - 15, distance + 110, 0, 0, 30, 30, 30, 30);
+        MCPVPProfile.drawLogo(graphics, font, columnX(3), distance + 110 + 12);
 
         graphics.text(font, TiersClient.getRightIcon(), centerX + 90 + 32, distance + 75 + 9, CommonColors.WHITE);
         graphics.text(font, TiersClient.getLeftIcon(), centerX - 90 - 32 - 12, distance + 75 + 9, CommonColors.WHITE);
@@ -141,15 +148,18 @@ public class ConfigScreen extends Screen {
         autoKitDetect.setPosition(width / 2 - 90, distance + 75);
         clearPlayerCache.setPosition(width - 88 - 5, height - 20 - 5);
         resetSettings.setPosition(5, height - 20 - 5);
-        leftMCTiers.setPosition(centerX - 120 - 10 - 24, distance + 145);
-        centerMCTiers.setPosition(centerX - 120 - 10, distance + 145);
-        rightMCTiers.setPosition(centerX - 120 - 10 + 24, distance + 145);
-        leftPvPTiers.setPosition(centerX - 10 - 24, distance + 145);
-        centerPvPTiers.setPosition(centerX - 10, distance + 145);
-        rightPvPTiers.setPosition(centerX - 10 + 24, distance + 145);
-        leftSubtiers.setPosition(centerX + 120 - 10 - 24, distance + 145);
-        centerSubtiers.setPosition(centerX + 120 - 10, distance + 145);
-        rightSubtiers.setPosition(centerX + 120 - 10 + 24, distance + 145);
+        leftMCTiers.setPosition(columnX(0) - 10 - 24, distance + 145);
+        centerMCTiers.setPosition(columnX(0) - 10, distance + 145);
+        rightMCTiers.setPosition(columnX(0) - 10 + 24, distance + 145);
+        leftPvPTiers.setPosition(columnX(1) - 10 - 24, distance + 145);
+        centerPvPTiers.setPosition(columnX(1) - 10, distance + 145);
+        rightPvPTiers.setPosition(columnX(1) - 10 + 24, distance + 145);
+        leftSubtiers.setPosition(columnX(2) - 10 - 24, distance + 145);
+        centerSubtiers.setPosition(columnX(2) - 10, distance + 145);
+        rightSubtiers.setPosition(columnX(2) - 10 + 24, distance + 145);
+        leftMCPVP.setPosition(columnX(3) - 10 - 24, distance + 145);
+        centerMCPVP.setPosition(columnX(3) - 10, distance + 145);
+        rightMCPVP.setPosition(columnX(3) - 10 + 24, distance + 145);
         activeRightMode.setPosition(centerX + 90 + 4, distance + 75);
         activeLeftMode.setPosition(centerX - 90 - 20 - 4, distance + 75);
         enableOwnProfile.setPosition(width - 20 - 5 - 88 - 4, height - 20 - 5);
@@ -262,137 +272,18 @@ public class ConfigScreen extends Screen {
             TiersClient.resetSettings();
         }).bounds(5, height - 20 - 5, 88, 20).tooltip(Tooltip.create(Component.literal("Reset Tiers settings to default"))).build();
 
-        leftMCTiers = Button.builder(Component.literal("←"), (buttonWidget) -> {
-            TiersClient.positionMCTiers = TiersClient.DisplayStatus.LEFT;
-            if (TiersClient.positionPvPTiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionPvPTiers = TiersClient.DisplayStatus.OFF;
-                leftPvPTiers.active = true;
-                centerPvPTiers.active = false;
-            }
-            if (TiersClient.positionSubtiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionSubtiers = TiersClient.DisplayStatus.OFF;
-                leftSubtiers.active = true;
-                centerSubtiers.active = false;
-            }
-            rightMCTiers.active = true;
-            centerMCTiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 120 - 10 - 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display MCTiers on the left"))).build();
-
-        centerMCTiers = Button.builder(Component.literal("●"), (buttonWidget) -> {
-            TiersClient.positionMCTiers = TiersClient.DisplayStatus.OFF;
-            leftMCTiers.active = true;
-            buttonWidget.active = false;
-            rightMCTiers.active = true;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 120 - 10, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Disable MCTiers"))).build();
-
-        rightMCTiers = Button.builder(Component.literal("→"), (buttonWidget) -> {
-            TiersClient.positionMCTiers = TiersClient.DisplayStatus.RIGHT;
-            if (TiersClient.positionPvPTiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionPvPTiers = TiersClient.DisplayStatus.OFF;
-                centerPvPTiers.active = false;
-                rightPvPTiers.active = true;
-            }
-            if (TiersClient.positionSubtiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionSubtiers = TiersClient.DisplayStatus.OFF;
-                centerSubtiers.active = false;
-                rightSubtiers.active = true;
-            }
-            leftMCTiers.active = true;
-            centerMCTiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 120 - 10 + 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display MCTiers on the right"))).build();
-
-        leftPvPTiers = Button.builder(Component.literal("←"), (buttonWidget) -> {
-            TiersClient.positionPvPTiers = TiersClient.DisplayStatus.LEFT;
-            if (TiersClient.positionMCTiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionMCTiers = TiersClient.DisplayStatus.OFF;
-                leftMCTiers.active = true;
-                centerMCTiers.active = false;
-            }
-            if (TiersClient.positionSubtiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionSubtiers = TiersClient.DisplayStatus.OFF;
-                leftSubtiers.active = true;
-                centerSubtiers.active = false;
-            }
-            rightPvPTiers.active = true;
-            centerPvPTiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 10 - 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display PvPTiers on the left"))).build();
-
-        centerPvPTiers = Button.builder(Component.literal("●"), (buttonWidget) -> {
-            TiersClient.positionPvPTiers = TiersClient.DisplayStatus.OFF;
-            leftPvPTiers.active = true;
-            buttonWidget.active = false;
-            rightPvPTiers.active = true;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 10, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Disable PvPTiers"))).build();
-
-        rightPvPTiers = Button.builder(Component.literal("→"), (buttonWidget) -> {
-            TiersClient.positionPvPTiers = TiersClient.DisplayStatus.RIGHT;
-            if (TiersClient.positionMCTiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionMCTiers = TiersClient.DisplayStatus.OFF;
-                centerMCTiers.active = false;
-                rightMCTiers.active = true;
-            }
-            if (TiersClient.positionSubtiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionSubtiers = TiersClient.DisplayStatus.OFF;
-                centerSubtiers.active = false;
-                rightSubtiers.active = true;
-            }
-            leftPvPTiers.active = true;
-            centerPvPTiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX - 10 + 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display PvPTiers on the right"))).build();
-
-        leftSubtiers = Button.builder(Component.literal("←"), (buttonWidget) -> {
-            TiersClient.positionSubtiers = TiersClient.DisplayStatus.LEFT;
-            if (TiersClient.positionMCTiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionMCTiers = TiersClient.DisplayStatus.OFF;
-                leftMCTiers.active = true;
-                centerMCTiers.active = false;
-            }
-            if (TiersClient.positionPvPTiers == TiersClient.DisplayStatus.LEFT) {
-                TiersClient.positionPvPTiers = TiersClient.DisplayStatus.OFF;
-                leftPvPTiers.active = true;
-                centerPvPTiers.active = false;
-            }
-            rightSubtiers.active = true;
-            centerSubtiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX + 120 - 10 - 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display Subtiers on the left"))).build();
-
-        centerSubtiers = Button.builder(Component.literal("●"), (buttonWidget) -> {
-            TiersClient.positionSubtiers = TiersClient.DisplayStatus.OFF;
-            leftSubtiers.active = true;
-            buttonWidget.active = false;
-            rightSubtiers.active = true;
-            ConfigManager.saveConfig();
-        }).bounds(centerX + 120 - 10, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Disable Subtiers"))).build();
-
-        rightSubtiers = Button.builder(Component.literal("→"), (buttonWidget) -> {
-            TiersClient.positionSubtiers = TiersClient.DisplayStatus.RIGHT;
-            if (TiersClient.positionMCTiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionMCTiers = TiersClient.DisplayStatus.OFF;
-                centerMCTiers.active = false;
-                rightMCTiers.active = true;
-            }
-            if (TiersClient.positionPvPTiers == TiersClient.DisplayStatus.RIGHT) {
-                TiersClient.positionPvPTiers = TiersClient.DisplayStatus.OFF;
-                centerPvPTiers.active = false;
-                rightPvPTiers.active = true;
-            }
-            leftSubtiers.active = true;
-            centerSubtiers.active = true;
-            buttonWidget.active = false;
-            ConfigManager.saveConfig();
-        }).bounds(centerX + 120 - 10 + 24, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal("Display Subtiers on the right"))).build();
+        leftMCTiers = positionButton("←", "Display MCTiers on the left", 0, TiersClient.DisplayStatus.LEFT, -24);
+        centerMCTiers = positionButton("●", "Disable MCTiers", 0, TiersClient.DisplayStatus.OFF, 0);
+        rightMCTiers = positionButton("→", "Display MCTiers on the right", 0, TiersClient.DisplayStatus.RIGHT, 24);
+        leftPvPTiers = positionButton("←", "Display PvPTiers on the left", 1, TiersClient.DisplayStatus.LEFT, -24);
+        centerPvPTiers = positionButton("●", "Disable PvPTiers", 1, TiersClient.DisplayStatus.OFF, 0);
+        rightPvPTiers = positionButton("→", "Display PvPTiers on the right", 1, TiersClient.DisplayStatus.RIGHT, 24);
+        leftSubtiers = positionButton("←", "Display Subtiers on the left", 2, TiersClient.DisplayStatus.LEFT, -24);
+        centerSubtiers = positionButton("●", "Disable Subtiers", 2, TiersClient.DisplayStatus.OFF, 0);
+        rightSubtiers = positionButton("→", "Display Subtiers on the right", 2, TiersClient.DisplayStatus.RIGHT, 24);
+        leftMCPVP = positionButton("←", "Display MCPVP on the left", 3, TiersClient.DisplayStatus.LEFT, -24);
+        centerMCPVP = positionButton("●", "Disable MCPVP", 3, TiersClient.DisplayStatus.OFF, 0);
+        rightMCPVP = positionButton("→", "Display MCPVP on the right", 3, TiersClient.DisplayStatus.RIGHT, 24);
 
         activeRightMode = Button.builder(Icons.CYCLE, (_) -> {
             TiersClient.cycleRightMode();
@@ -435,8 +326,50 @@ public class ConfigScreen extends Screen {
         updateActiveButtonsState();
         buttonsReady = true;
 
-        Stream.of(toggleMod, toggleRegion, toggleIcons, togglePeak, toggleTab, toggleChat, toggleSeparatorMode, cycleDisplayMode, autoKitDetect, clearPlayerCache, resetSettings, leftMCTiers, centerMCTiers, rightMCTiers, leftPvPTiers, centerPvPTiers, rightPvPTiers, leftSubtiers, centerSubtiers, rightSubtiers, activeRightMode, activeLeftMode, enableOwnProfile, useClassicIcons, usePvPTiersIcons, useMCTiersIcons)
+        Stream.of(toggleMod, toggleRegion, toggleIcons, togglePeak, toggleTab, toggleChat, toggleSeparatorMode, cycleDisplayMode, autoKitDetect, clearPlayerCache, resetSettings, leftMCTiers, centerMCTiers, rightMCTiers, leftPvPTiers, centerPvPTiers, rightPvPTiers, leftSubtiers, centerSubtiers, rightSubtiers, leftMCPVP, centerMCPVP, rightMCPVP, activeRightMode, activeLeftMode, enableOwnProfile, useClassicIcons, usePvPTiersIcons, useMCTiersIcons)
                 .forEach(this::addRenderableWidget);
+    }
+
+    /** X centre of the n-th tierlist column (MCTiers, PvPTiers, Subtiers, MCPVP). */
+    /** Distance between tierlist columns: 116px, shrinking on narrow screens so all four stay on screen. */
+    private int columnSpacing() {
+        return Math.max(76, Math.min(116, (width - 16) / 4));
+    }
+
+    private int columnX(int column) {
+        return centerX + (column * 2 - 3) * columnSpacing() / 2;
+    }
+
+    private static TiersClient.DisplayStatus getTierlistPosition(int tierlist) {
+        return switch (tierlist) {
+            case 0 -> TiersClient.positionMCTiers;
+            case 1 -> TiersClient.positionPvPTiers;
+            case 2 -> TiersClient.positionSubtiers;
+            default -> TiersClient.positionMCPVP;
+        };
+    }
+
+    private static void setTierlistPosition(int tierlist, TiersClient.DisplayStatus position) {
+        switch (tierlist) {
+            case 0 -> TiersClient.positionMCTiers = position;
+            case 1 -> TiersClient.positionPvPTiers = position;
+            case 2 -> TiersClient.positionSubtiers = position;
+            default -> TiersClient.positionMCPVP = position;
+        }
+    }
+
+    /** Left / off / right button for a tierlist; only one tierlist can occupy each side. */
+    private Button positionButton(String label, String tooltip, int tierlist, TiersClient.DisplayStatus target, int offset) {
+        return Button.builder(Component.literal(label), (_) -> {
+            if (target != TiersClient.DisplayStatus.OFF)
+                for (int other = 0; other < 4; other++)
+                    if (other != tierlist && getTierlistPosition(other) == target)
+                        setTierlistPosition(other, TiersClient.DisplayStatus.OFF);
+            setTierlistPosition(tierlist, target);
+            updateActiveButtonsState();
+            updateVisibilities();
+            ConfigManager.saveConfig();
+        }).bounds(columnX(tierlist) - 10 + offset, distance + 145, 20, 20).tooltip(Tooltip.create(Component.literal(tooltip))).build();
     }
 
     private void updateActiveButtonsState() {
@@ -457,6 +390,9 @@ public class ConfigScreen extends Screen {
         leftSubtiers.active = TiersClient.toggleMod;
         centerSubtiers.active = TiersClient.toggleMod;
         rightSubtiers.active = TiersClient.toggleMod;
+        leftMCPVP.active = TiersClient.toggleMod;
+        centerMCPVP.active = TiersClient.toggleMod;
+        rightMCPVP.active = TiersClient.toggleMod;
         activeLeftMode.active = TiersClient.toggleMod;
         activeRightMode.active = TiersClient.toggleMod;
 
@@ -477,11 +413,17 @@ public class ConfigScreen extends Screen {
             case OFF -> centerSubtiers.active = false;
             case LEFT -> leftSubtiers.active = false;
         }
+
+        switch (TiersClient.positionMCPVP) {
+            case RIGHT -> rightMCPVP.active = false;
+            case OFF -> centerMCPVP.active = false;
+            case LEFT -> leftMCPVP.active = false;
+        }
     }
 
     private void updateVisibilities() {
-        activeRightMode.visible = TiersClient.positionMCTiers == TiersClient.DisplayStatus.RIGHT || TiersClient.positionPvPTiers == TiersClient.DisplayStatus.RIGHT || TiersClient.positionSubtiers == TiersClient.DisplayStatus.RIGHT;
-        activeLeftMode.visible = TiersClient.positionMCTiers == TiersClient.DisplayStatus.LEFT || TiersClient.positionPvPTiers == TiersClient.DisplayStatus.LEFT || TiersClient.positionSubtiers == TiersClient.DisplayStatus.LEFT;
+        activeRightMode.visible = TiersClient.positionMCTiers == TiersClient.DisplayStatus.RIGHT || TiersClient.positionPvPTiers == TiersClient.DisplayStatus.RIGHT || TiersClient.positionSubtiers == TiersClient.DisplayStatus.RIGHT || TiersClient.positionMCPVP == TiersClient.DisplayStatus.RIGHT;
+        activeLeftMode.visible = TiersClient.positionMCTiers == TiersClient.DisplayStatus.LEFT || TiersClient.positionPvPTiers == TiersClient.DisplayStatus.LEFT || TiersClient.positionSubtiers == TiersClient.DisplayStatus.LEFT || TiersClient.positionMCPVP == TiersClient.DisplayStatus.LEFT;
     }
 
     private void drawPlayerAvatar(GuiGraphicsExtractor graphics, int x, int y) {

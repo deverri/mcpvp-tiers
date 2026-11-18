@@ -1,28 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "tiers",
+  "id": "mcpvp-tiers",
   "version": "${version}",
-  "name": "Tiers",
-  "description": "Official PvPTiers tiers display mod",
+  "name": "MCPvP Tiers (Tiers Fork)",
+  "description": "Shows MCPvP (mcpvp.com) tiers on nametags, the tab list and chat, alongside PvPTiers, MCTiers and Subtiers. Unofficial fork of the Tiers mod by Flavio6561; not affiliated with MCPvP or PvPTiers.",
   "authors": [
-    "Flavio6561"
+    "${fork_author}",
+    {
+      "name": "Flavio6561 (original Tiers author)",
+      "contact": {
+        "homepage": "https://github.com/PvPTiers/Tiers"
+      }
+    }
   ],
-  "license": "GPL-3.0",
+  "license": "GPL-3.0-only",
   "contact": {
-    "issues": "https://github.com/PvPTiers/Tiers/issues",
-    "homepage": "https://github.com/PvPTiers/Tiers"
+    "homepage": "${homepage_url}",
+    "sources": "${sources_url}",
+    "issues": "${issues_url}"
   },
   "custom": {
     "modmenu": {
       "links": {
-        "GitHub": "https://github.com/PvPTiers/Tiers",
-        "Modrinth page": "https://modrinth.com/mod/tiers",
-        "Changelogs": "https://github.com/PvPTiers/Tiers/wiki/Version-changelogs",
-        "GitHub Issues": "https://github.com/PvPTiers/Tiers/issues"
+        "modmenu.github_releases": "${sources_url}",
+        "Original Tiers mod": "https://github.com/PvPTiers/Tiers"
       }
     }
   },
-  "icon": "assets/tiers/icon.png",
+  "icon": "assets/mcpvp-tiers/icon.png",
   "entrypoints": {
     "client": [
       "com.tiers.TiersClient"
@@ -39,8 +44,13 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.5",
-    "minecraft": ["${minecraft_version}"],
+    "minecraft": [
+      "${minecraft_version}"
+    ],
     "java": ">=25",
     "fabric-api": "*"
+  },
+  "breaks": {
+    "tiers": "*"
   }
 }

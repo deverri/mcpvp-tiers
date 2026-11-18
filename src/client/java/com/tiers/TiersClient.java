@@ -57,7 +57,12 @@ import java.util.stream.Collectors;
 
 public class TiersClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(TiersClient.class);
-    public static String userAgent = "Tiers (modrinth.com/mod/tiers)";
+    public static final String MOD_ID = "mcpvp-tiers";
+    public static String userAgent = "MCPvP-Tiers (unofficial fork of the Tiers mod)";
+    /** Issue tracker from fabric.mod.json (contact.issues); null when the mod is built without one. */
+    public static String issuesUrl;
+    /** Project page from fabric.mod.json (contact.homepage); null when not set. */
+    public static String homepageUrl;
     public static final CopyOnWriteArrayList<PlayerProfile> playerProfiles = new CopyOnWriteArrayList<>();
     public static final HashMap<String, PlayerProfile> readyPlayerProfiles = new HashMap<>();
     public static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -84,6 +89,9 @@ public class TiersClient implements ClientModInitializer {
     public static DisplayStatus positionSubtiers = DisplayStatus.OFF;
     public static Mode activeSubtiersMode = Mode.SUBTIERS_MINECART;
 
+    public static DisplayStatus positionMCPVP = DisplayStatus.RIGHT;
+    public static Mode activeMCPVPMode = Mode.MCPVP_SWORD;
+
     public static KeyMapping autoDetectKey;
     public static KeyMapping openClosestPlayerProfile;
     public static KeyMapping cycleRightKey;
@@ -96,11 +104,13 @@ public class TiersClient implements ClientModInitializer {
         clearCache(true);
         CommandRegister.registerCommands();
 
-        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("tiers");
+        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer(MOD_ID);
 
         modContainer.ifPresent(tiers -> {
             ResourceLoader.registerBuiltinPack(Identifier.fromNamespaceAndPath("resourcepacks", "tiers-resources"), tiers, Component.literal("Resources for Tiers"), PackActivationType.ALWAYS_ENABLED);
             userAgent += " v" + tiers.getMetadata().getVersion().getFriendlyString();
+            issuesUrl = tiers.getMetadata().getContact().get("issues").filter(url -> !url.isBlank()).orElse(null);
+            homepageUrl = tiers.getMetadata().getContact().get("homepage").filter(url -> !url.isBlank()).orElse(null);
         });
 
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.parse("tiers"));
@@ -168,6 +178,8 @@ public class TiersClient implements ClientModInitializer {
                         playerProfile.profilePvPTiers.parseJson(playerProfile.profilePvPTiers.originalJson);
                     if (playerProfile.profileSubtiers.status == Status.READY)
                         playerProfile.profileSubtiers.parseJson(playerProfile.profileSubtiers.originalJson);
+                    if (playerProfile.profileMCPVP != null && playerProfile.profileMCPVP.status == Status.READY)
+                        playerProfile.profileMCPVP.parseJson(playerProfile.profileMCPVP.originalJson);
                 }
                 playerProfile.updateAppendingText();
             });
@@ -237,6 +249,9 @@ public class TiersClient implements ClientModInitializer {
         if (positionSubtiers.toString().equalsIgnoreCase("RIGHT"))
             return Component.literal("Right (Subtiers) is now displaying ").setStyle(Style.EMPTY.withColor(CommonColors.WHITE)).append(cycleSubtiersMode());
 
+        if (positionMCPVP.toString().equalsIgnoreCase("RIGHT"))
+            return Component.literal("Right (MCPVP) is now displaying ").setStyle(Style.EMPTY.withColor(CommonColors.WHITE)).append(cycleMCPVPMode());
+
         return null;
     }
 
@@ -255,6 +270,9 @@ public class TiersClient implements ClientModInitializer {
         if (positionSubtiers.toString().equalsIgnoreCase("LEFT"))
             return Component.literal("Left (Subtiers) is now displaying ").setStyle(Style.EMPTY.withColor(CommonColors.WHITE)).append(cycleSubtiersMode());
 
+        if (positionMCPVP.toString().equalsIgnoreCase("LEFT"))
+            return Component.literal("Left (MCPVP) is now displaying ").setStyle(Style.EMPTY.withColor(CommonColors.WHITE)).append(cycleMCPVPMode());
+
         return null;
     }
 
@@ -268,6 +286,9 @@ public class TiersClient implements ClientModInitializer {
         if (positionSubtiers.toString().equalsIgnoreCase("RIGHT"))
             return activeSubtiersMode.getIcon();
 
+        if (positionMCPVP.toString().equalsIgnoreCase("RIGHT"))
+            return activeMCPVPMode.getIcon();
+
         return Component.empty();
     }
 
@@ -280,6 +301,9 @@ public class TiersClient implements ClientModInitializer {
 
         if (positionSubtiers.toString().equalsIgnoreCase("LEFT"))
             return activeSubtiersMode.getIcon();
+
+        if (positionMCPVP.toString().equalsIgnoreCase("LEFT"))
+            return activeMCPVPMode.getIcon();
 
         return Component.empty();
     }
@@ -354,12 +378,13 @@ public class TiersClient implements ClientModInitializer {
             resetSettings();
         else if (playerName.equalsIgnoreCase("-help") || playerName.equalsIgnoreCase("-debug")) {
             sendMessageToPlayer(Icons.colorText("", CommonColors.WHITE), false);
-            sendMessageToPlayer(Icons.colorText("--- Tiers help ---", CommonColors.YELLOW), false);
-            sendMessageToPlayer(Component.literal("- General contact: ").append(Component.literal("flavio6561 on Discord").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discordapp.com/users/715189608085716992"))))), false);
-            sendMessageToPlayer(Component.literal("- Report a bug: ").append(Component.literal("Tiers GitHub issues").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/PvPTiers/Tiers/issues"))))), false);
-            sendMessageToPlayer(Component.literal("- It's not advisable to create tickets in PvPTiers support"), false);
-            sendMessageToPlayer(Component.literal("- ").append(Component.literal("Changelogs").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/PvPTiers/Tiers/wiki/Version-changelogs"))))), false);
-            sendMessageToPlayer(Component.literal("- ").append(Component.literal("Modrinth page").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://modrinth.com/mod/tiers"))))), false);
+            sendMessageToPlayer(Icons.colorText("--- MCPvP Tiers help ---", CommonColors.YELLOW), false);
+            if (issuesUrl != null)
+                sendMessageToPlayer(Component.literal("- Report a bug: ").append(Component.literal("MCPvP Tiers issues").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create(issuesUrl))))), false);
+            sendMessageToPlayer(Component.literal("- This is an unofficial fork: please don't contact PvPTiers, MCPvP or the original Tiers author about it"), false);
+            if (homepageUrl != null)
+                sendMessageToPlayer(Component.literal("- ").append(Component.literal("Project page").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create(homepageUrl))))), false);
+            sendMessageToPlayer(Component.literal("- Unofficial fork of ").append(Component.literal("Tiers by Flavio6561").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/PvPTiers/Tiers"))))).append(Component.literal(" (GPL-3.0)")), false);
 
             String[] debugInfo = getDebugInfo();
             sendMessageToPlayer(Icons.colorText("\n" + debugInfo[0], CommonColors.SOFT_YELLOW), false);
@@ -395,10 +420,12 @@ public class TiersClient implements ClientModInitializer {
             sendMessageToPlayer(Icons.colorText("MCTiers requests failed: " + SuperProfile.failedMCTiersRequests + "/" + SuperProfile.MCTiersRequests + " (failed / requested)", CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("PvPTiers requests failed: " + SuperProfile.failedPvPTiersRequests + "/" + SuperProfile.PvPTiersRequests + " (failed / requested)", CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("Subtiers requests failed: " + SuperProfile.failedSubtiersRequests + "/" + SuperProfile.SubtiersRequests + " (failed / requested)", CommonColors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("MCPVP requests failed: " + SuperProfile.failedMCPVPRequests + "/" + SuperProfile.MCPVPRequests + " (failed / requested)", CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("", CommonColors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("MCTiers status | is down? " + SuperProfile.isMCTiersDown + " | Failed request in last minute: " + SuperProfile.failedMCTiersRequestsLastMinute, CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("PvPTiers status | is down? " + SuperProfile.isPvPTiersDown + " | Failed request in last minute: " + SuperProfile.failedPvPTiersRequestsLastMinute, CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("Subtiers status | is down? " + SuperProfile.isSubtiersDown + " | Failed request in last minute: " + SuperProfile.failedSubtiersRequestsLastMinute, CommonColors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("MCPVP status | is down? " + SuperProfile.isMCPVPDown + " | Failed request in last minute: " + SuperProfile.failedMCPVPRequestsLastMinute, CommonColors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("Tiers will try to recover all failed requests once the services come back up", CommonColors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("", CommonColors.WHITE), false);
         } else if (playerName.startsWith("-")) {
@@ -433,7 +460,7 @@ public class TiersClient implements ClientModInitializer {
         debugInfo[3] = ConfigManager.getCurrentConfig();
 
         final String[] version = new String[1];
-        FabricLoader.getInstance().getModContainer("tiers").ifPresent(tiers -> version[0] = "Tiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(tiers -> version[0] = "MCPvP Tiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
         debugInfo[0] = version[0] + "\n";
         debugInfo[1] = debugInfo[0];
         debugInfo[1] += "Launcher brand: " + Minecraft.getLauncherBrand() + "\n";
@@ -534,13 +561,22 @@ public class TiersClient implements ClientModInitializer {
         return activeSubtiersMode.getTextLabel();
     }
 
+    public static Component cycleMCPVPMode() {
+        activeMCPVPMode = cycleEnum(activeMCPVPMode, Mode.getMCPVPValues());
+        ConfigManager.saveConfig();
+        return activeMCPVPMode.getTextLabel();
+    }
+
     public static void cycleDisplayMode() {
         displayMode = cycleEnum(displayMode, ModesTierDisplay.values());
         ConfigManager.saveConfig();
     }
 
     private static <T extends Enum<T>> T cycleEnum(T current, T[] values) {
-        return values[(current.ordinal() + 1) % values.length];
+        for (int i = 0; i < values.length; i++)
+            if (values[i] == current)
+                return values[(i + 1) % values.length];
+        return values[0];
     }
 
     public enum ModesTierDisplay {

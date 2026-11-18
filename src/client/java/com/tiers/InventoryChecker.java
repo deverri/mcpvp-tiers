@@ -25,6 +25,7 @@ public class InventoryChecker {
         Mode oldActiveMCTiersMode = TiersClient.activeMCTiersMode;
         Mode oldActivePvPTiersMode = TiersClient.activePvPTiersMode;
         Mode oldActiveSubtiersMode = TiersClient.activeSubtiersMode;
+        Mode oldActiveMCPVPMode = TiersClient.activeMCPVPMode;
         Mode detected = null;
 
         Inventory inventory = minecraft.player.getInventory();
@@ -32,36 +33,42 @@ public class InventoryChecker {
         if (checkVanilla(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_VANILLA;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_CRYSTAL;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_CRYSTAL;
             detected = Mode.MCTIERS_VANILLA;
         }
 
         if (checkSword(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_SWORD;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_SWORD;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_SWORD;
             detected = Mode.MCTIERS_SWORD;
         }
 
         if (checkUhc(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_UHC;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_UHC;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_UHC;
             detected = Mode.MCTIERS_UHC;
         }
 
         if (checkPot(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_POT;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_POT;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_POT;
             detected = Mode.MCTIERS_POT;
         }
 
         if (checkNethPot(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_NETH_OP;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_NETH_POT;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_NETHERITE_POT;
             detected = Mode.MCTIERS_NETH_OP;
         }
 
         if (checkSmp(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_SMP;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_SMP;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_SMP;
             detected = Mode.MCTIERS_SMP;
         }
 
@@ -74,11 +81,13 @@ public class InventoryChecker {
         if (checkMace(inventory)) {
             TiersClient.activeMCTiersMode = Mode.MCTIERS_MACE;
             TiersClient.activePvPTiersMode = Mode.PVPTIERS_MACE;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_MACE;
             detected = Mode.MCTIERS_MACE;
         }
 
         if (checkMinecart(inventory)) {
             TiersClient.activeSubtiersMode = Mode.SUBTIERS_MINECART;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_CART;
             detected = Mode.SUBTIERS_MINECART;
         }
 
@@ -104,6 +113,7 @@ public class InventoryChecker {
 
         if (checkCreeper(inventory)) {
             TiersClient.activeSubtiersMode = Mode.SUBTIERS_CREEPER;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_CREEPER;
             detected = Mode.SUBTIERS_CREEPER;
         }
 
@@ -114,11 +124,13 @@ public class InventoryChecker {
 
         if (checkDiamondSmp(inventory)) {
             TiersClient.activeSubtiersMode = Mode.SUBTIERS_DIAMOND_SMP;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_DIAMOND_SMP;
             detected = Mode.SUBTIERS_DIAMOND_SMP;
         }
 
         if (checkBow(inventory)) {
             TiersClient.activeSubtiersMode = Mode.SUBTIERS_BOW;
+            TiersClient.activeMCPVPMode = Mode.MCPVP_BOW;
             detected = Mode.SUBTIERS_BOW;
         }
 
@@ -137,7 +149,7 @@ public class InventoryChecker {
             detected = Mode.SUBTIERS_TRIDENT;
         }
 
-        if ((oldActiveMCTiersMode != TiersClient.activeMCTiersMode || oldActivePvPTiersMode != TiersClient.activePvPTiersMode || oldActiveSubtiersMode != TiersClient.activeSubtiersMode) && detected != null) {
+        if ((oldActiveMCTiersMode != TiersClient.activeMCTiersMode || oldActivePvPTiersMode != TiersClient.activePvPTiersMode || oldActiveSubtiersMode != TiersClient.activeSubtiersMode || oldActiveMCPVPMode != TiersClient.activeMCPVPMode) && detected != null) {
             ConfigManager.saveConfig();
             TiersClient.sendMessageToPlayer(Component.empty().append(Component.literal("Now displaying: ")).append(detected.getTextLabel()), true);
         } else if (showMessage) {

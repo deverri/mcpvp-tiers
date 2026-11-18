@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "mcpvp-tiers-gametest",
+  "version": "1.0.0",
+  "name": "MCPvP Tiers screen tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "com.tiers.gametest.LookupScreenGameTest"
+    ]
+  },
+  "depends": {
+    "mcpvp-tiers": "*"
+  }
+}

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tiers.TiersClient;
 import com.tiers.misc.Mode;
+import com.tiers.profile.types.MCPVPProfile;
 import com.tiers.profile.types.MCTiersProfile;
 import com.tiers.profile.types.PvPTiersProfile;
 import com.tiers.profile.types.SubtiersProfile;
@@ -59,6 +60,7 @@ public class PlayerProfile {
     public MCTiersProfile profileMCTiers;
     public PvPTiersProfile profilePvPTiers;
     public SubtiersProfile profileSubtiers;
+    public MCPVPProfile profileMCPVP;
 
     public Component toAppendLeft = Component.empty();
     public Component toAppendRight = Component.empty();
@@ -91,7 +93,7 @@ public class PlayerProfile {
         status = !name.matches("^[a-zA-Z0-9_]{3,16}$") ? Status.NOT_PLAYER : Status.SEARCHING;
     }
 
-    public PlayerProfile(String mojangJson, String jsonMCTiers, String jsonPvPTiers, String jsonSubtiers) {
+    public PlayerProfile(String mojangJson, String jsonMCTiers, String jsonPvPTiers, String jsonSubtiers, String jsonMCPVP) {
         regular = false;
 
         if (JsonParser.parseString(mojangJson).isJsonNull()) {
@@ -122,6 +124,7 @@ public class PlayerProfile {
         profileMCTiers = new MCTiersProfile(jsonMCTiers);
         profilePvPTiers = new PvPTiersProfile(jsonPvPTiers);
         profileSubtiers = new SubtiersProfile(jsonSubtiers);
+        profileMCPVP = new MCPVPProfile(jsonMCPVP);
 
         status = Status.READY;
     }
@@ -330,10 +333,13 @@ public class PlayerProfile {
                 profilePvPTiers = new PvPTiersProfile("https://pvptiers.com/api/profile/", uuid, extra);
             if (mode == 0 || mode == 3)
                 profileSubtiers = new SubtiersProfile("https://subtiers.net/api/profile/", uuid, extra);
+            if (mode == 0 || mode == 4)
+                profileMCPVP = new MCPVPProfile(MCPVPProfile.PROFILE_URL, uuid, extra);
 
             profileMCTiers.setOnUpdate(this::updateAppendingText);
             profilePvPTiers.setOnUpdate(this::updateAppendingText);
             profileSubtiers.setOnUpdate(this::updateAppendingText);
+            profileMCPVP.setOnUpdate(this::updateAppendingText);
         });
     }
 
@@ -355,6 +361,11 @@ public class PlayerProfile {
             toAppendRight = updateProfileNameRight(profileSubtiers, activeSubtiersMode);
         else if (positionSubtiers == DisplayStatus.LEFT)
             toAppendLeft = updateProfileNameLeft(profileSubtiers, activeSubtiersMode);
+
+        if (positionMCPVP == DisplayStatus.RIGHT)
+            toAppendRight = updateProfileNameRight(profileMCPVP, activeMCPVPMode);
+        else if (positionMCPVP == DisplayStatus.LEFT)
+            toAppendLeft = updateProfileNameLeft(profileMCPVP, activeMCPVPMode);
 
         cachesDirty = true;
     }
@@ -401,10 +412,11 @@ public class PlayerProfile {
         if (shown == null || shown.status != Status.READY)
             return returnValue;
 
-        MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? (TiersClient.toggleRegion ? superProfile.displayedRegion.getStyle() : ((togglePeak && shown.hasPeak) ? shown.displayedPeakTier.getStyle() : shown.displayedTier.getStyle())) : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
+        boolean showRegion = toggleRegion && superProfile.hasRegion();
+        MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? (showRegion ? superProfile.displayedRegion.getStyle() : ((togglePeak && shown.hasPeak) ? shown.displayedPeakTier.getStyle() : shown.displayedTier.getStyle())) : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
         returnValue.append(Component.empty().append(separator));
 
-        if (toggleRegion)
+        if (showRegion)
             returnValue.append(superProfile.displayedRegion).append(Component.literal(" "));
 
         if (togglePeak && shown.hasPeak)
@@ -438,7 +450,8 @@ public class PlayerProfile {
         if (shown == null || shown.status != Status.READY)
             return returnValue;
 
-        MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? (TiersClient.toggleRegion ? superProfile.displayedRegion.getStyle() : ((togglePeak && shown.hasPeak) ? shown.displayedPeakTier.getStyle() : shown.displayedTier.getStyle())) : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
+        boolean showRegion = toggleRegion && superProfile.hasRegion();
+        MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? (showRegion ? superProfile.displayedRegion.getStyle() : ((togglePeak && shown.hasPeak) ? shown.displayedPeakTier.getStyle() : shown.displayedTier.getStyle())) : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
 
         if (toggleIcons)
             returnValue = Component.empty().append(shown.gamemode.getIconTag()).append(" ");
@@ -448,7 +461,7 @@ public class PlayerProfile {
         else
             returnValue.append(Component.empty().append(shown.displayedTier));
 
-        if (toggleRegion)
+        if (showRegion)
             returnValue.append(Component.literal(" ").append(superProfile.displayedRegion));
 
         returnValue.append(Component.empty().append(separator));
@@ -457,18 +470,21 @@ public class PlayerProfile {
     }
 
     public void resetDrawnStatus() {
-        if (profileMCTiers == null || profilePvPTiers == null || profileSubtiers == null)
+        if (profileMCTiers == null || profilePvPTiers == null || profileSubtiers == null || profileMCPVP == null)
             return;
 
         profileMCTiers.apiErrorShown = false;
         profilePvPTiers.apiErrorShown = false;
         profileSubtiers.apiErrorShown = false;
+        profileMCPVP.apiErrorShown = false;
         profileMCTiers.drawn = false;
         profilePvPTiers.drawn = false;
         profileSubtiers.drawn = false;
+        profileMCPVP.drawn = false;
         profileMCTiers.gameModes.forEach(gameMode -> gameMode.drawn = false);
         profilePvPTiers.gameModes.forEach(gameMode -> gameMode.drawn = false);
         profileSubtiers.gameModes.forEach(gameMode -> gameMode.drawn = false);
+        profileMCPVP.gameModes.forEach(gameMode -> gameMode.drawn = false);
     }
 
     public boolean isPlayerValid() {
@@ -609,6 +625,7 @@ public class PlayerProfile {
                 "\n\nprofileMCTiers=" + (profileMCTiers != null ? profileMCTiers : "null") +
                 "\n\nprofilePvPTiers=" + (profilePvPTiers != null ? profilePvPTiers : "null") +
                 "\n\nprofileSubtiers=" + (profileSubtiers != null ? profileSubtiers : "null") +
+                "\n\nprofileMCPVP=" + (profileMCPVP != null ? profileMCPVP : "null") +
                 "}\n\n\n--- NEXT ---\n\n\n";
     }
 }

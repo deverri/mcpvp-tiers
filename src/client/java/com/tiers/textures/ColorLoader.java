@@ -44,11 +44,13 @@ public class ColorLoader implements PreparableReloadListener {
             String defaultProfileMCTiers = loadStringFromResources("json/defaultProfileMCTiers.json");
             String defaultProfilePvPTiers = loadStringFromResources("json/defaultProfilePvPTiers.json");
             String defaultProfileSubtiers = loadStringFromResources("json/defaultProfileSubtiers.json");
+            String defaultProfileMCPVP = loadStringFromResources("json/defaultProfileMCPVP.json");
 
             ConfigScreen.defaultProfile = new PlayerProfile(defaultProfileMojang,
                     defaultProfileMCTiers,
                     defaultProfilePvPTiers,
-                    defaultProfileSubtiers);
+                    defaultProfileSubtiers,
+                    defaultProfileMCPVP);
 
         } else {
             ArrayList<PlayerProfile> configProfiles = new ArrayList<>();

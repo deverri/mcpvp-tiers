@@ -1,0 +1,148 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/sword.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/shield.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/pot.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/early_game.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/end_game.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/mace.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/late_game.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf006"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/smp.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf007"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/cart.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf008"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/creeper.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf009"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/spear.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00a"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/bow.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00b"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/crystal.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00c"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/diamond_smp.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00d"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/netherite_pot.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00e"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/gamemodes/mcpvp/uhc.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": [
+        "\uf00f"
+      ]
+    }
+  ]
+}

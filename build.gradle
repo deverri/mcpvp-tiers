@@ -21,10 +21,20 @@ repositories {
 loom {
     splitEnvironmentSourceSets()
     mods {
-        "tiers" {
+        "mcpvp-tiers" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
+    }
+}
+
+// Client game tests (screenshots of the lookup screen): `gradlew runClientGameTest`. Not part of the mod jar.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "mcpvp-tiers-gametest"
+        enableGameTests = false
+        enableClientGameTests = true
     }
 }
 
@@ -37,12 +47,30 @@ dependencies {
     api "com.terraformersmc:modmenu:${modmenu_version}"
 }
 
+def forkMetadata = [
+        fork_author : project.findProperty("fork_author") ?: "",
+        homepage_url: project.findProperty("homepage_url") ?: "",
+        sources_url : project.findProperty("sources_url") ?: "",
+        issues_url  : project.findProperty("issues_url") ?: "",
+]
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version, minecraft_version: project.minecraft_version
+    forkMetadata.each { key, value -> inputs.property key, value }
+    doFirst {
+        if (forkMetadata.fork_author.isBlank())
+            throw new GradleException("Set fork_author in gradle.properties before building a release")
     }
+    filesMatching("fabric.mod.json") {
+        expand([version: project.version, minecraft_version: project.minecraft_version] + forkMetadata)
+    }
+}
+
+// Ship the license and the modification notice inside the jar (GPL-3.0)
+jar {
+    from("LICENSE") { rename { "LICENSE_${project.archives_base_name}" } }
+    from("NOTICE.md") { rename { "NOTICE_${project.archives_base_name}.md" } }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -55,13 +83,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+// Upload with `gradlew modrinth` (needs MODRINTH_TOKEN and modrinth_project_id in gradle.properties).
+// Deliberately has no default project id so nothing can be uploaded to the original Tiers project.
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
-    projectId = "bubOj4AD"
+    projectId = project.findProperty("modrinth_project_id") ?: ""
     versionNumber = "${project.version}"
-    versionName = "Tiers ${project.version}"
-    def changelogVersion = project.simple_version.replace('.', '')
-    changelog = "[Version ${project.simple_version}](https://github.com/PvPTiers/Tiers/wiki/Version-changelogs#version-${changelogVersion})"
+    versionName = "MCPvP Tiers ${project.simple_version}"
+    changelog = project.file("CHANGELOG.md").exists() ? project.file("CHANGELOG.md").text : ""
     uploadFile = jar
     versionType = "beta"
     gameVersions = [project.minecraft_version]
@@ -69,9 +98,13 @@ modrinth {
     environment = "client_only"
 
     dependencies {
-        required.project "P7dR8mSH"
-        optional.project "mOgUt4GM"
+        required.project "P7dR8mSH" // Fabric API
+        optional.project "mOgUt4GM" // Mod Menu
     }
 }
 
 tasks.modrinth.dependsOn(tasks.jar)
+tasks.modrinth.doFirst {
+    if ((project.findProperty("modrinth_project_id") ?: "").isBlank())
+        throw new GradleException("Set modrinth_project_id in gradle.properties to your own Modrinth project")
+}

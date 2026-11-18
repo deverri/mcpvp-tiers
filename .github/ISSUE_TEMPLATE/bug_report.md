@@ -1,16 +1,16 @@
 ---
 name: Bug report
-about: Report a bug in Tiers
+about: Report a bug in MCPvP Tiers
 title: ''
 labels: bug
-assignees: Flavio6561
+assignees: ''
 
 ---
 
 **Disclaimers**
-- If you have trouble reporting a bug here, [contact me on Discord](
-https://discordapp.com/users/715189608085716992) (flavio6561)
-- When reporting a bug, make sure you are on the [latest version of Tiers](https://modrinth.com/mod/tiers/versions). You can check your version by looking at Tiers's details in your mod list.
+- This is the issue tracker for **MCPvP Tiers**, an unofficial fork. Please don't report these bugs to the original Tiers project, PvPTiers or MCPvP.
+- Make sure you are on the [latest release](../../releases). Your version is shown next to MCPvP Tiers in your mod list, or with `/tiers -help`.
+- If MCPvP tiers stopped showing for everyone, include the output of `/tiers -status`: mcpvp.com may have changed its website.
 
 **Describe the bug**
 A clear and concise description of what the bug is.

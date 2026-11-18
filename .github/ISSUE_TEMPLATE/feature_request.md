@@ -1,9 +1,9 @@
 ---
 name: Feature request
-about: Suggest an idea for Tiers
+about: Suggest an idea for MCPvP Tiers
 title: ''
 labels: enhancement
-assignees: Flavio6561
+assignees: ''
 
 ---
 

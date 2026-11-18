@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("Tiers.json");
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("MCPvPTiers.json");
     private static final Config DEFAULT_CONFIG = new Config();
     private static Config config;
     private static String version;
@@ -28,7 +28,7 @@ public class ConfigManager {
     private static int launchTickCounter;
 
     static {
-        FabricLoader.getInstance().getModContainer("tiers").ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer(TiersClient.MOD_ID).ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
     }
 
     private static class Config {
@@ -51,6 +51,9 @@ public class ConfigManager {
 
         TiersClient.DisplayStatus positionSubtiers = TiersClient.positionSubtiers;
         Mode activeSubtiersMode = TiersClient.activeSubtiersMode;
+
+        TiersClient.DisplayStatus positionMCPVP = TiersClient.positionMCPVP;
+        Mode activeMCPVPMode = TiersClient.activeMCPVPMode;
 
         String version;
     }
@@ -97,6 +100,11 @@ public class ConfigManager {
             TiersClient.positionSubtiers = config.positionSubtiers;
         if (Arrays.stream(Mode.values()).toList().contains(config.activeSubtiersMode) && config.activeSubtiersMode.toString().contains("SUBTIERS"))
             TiersClient.activeSubtiersMode = config.activeSubtiersMode;
+
+        if (Arrays.stream(TiersClient.DisplayStatus.values()).toList().contains(config.positionMCPVP))
+            TiersClient.positionMCPVP = config.positionMCPVP;
+        if (config.activeMCPVPMode != null && config.activeMCPVPMode.getCategory() == Mode.Category.MCPVP)
+            TiersClient.activeMCPVPMode = config.activeMCPVPMode;
 
         if (config.version == null) {
             ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -174,6 +182,9 @@ public class ConfigManager {
         config.positionSubtiers = TiersClient.positionSubtiers;
         config.activeSubtiersMode = TiersClient.activeSubtiersMode;
 
+        config.positionMCPVP = TiersClient.positionMCPVP;
+        config.activeMCPVPMode = TiersClient.activeMCPVPMode;
+
         config.version = version;
     }
 
@@ -197,6 +208,9 @@ public class ConfigManager {
 
         TiersClient.positionSubtiers = DEFAULT_CONFIG.positionSubtiers;
         TiersClient.activeSubtiersMode = DEFAULT_CONFIG.activeSubtiersMode;
+
+        TiersClient.positionMCPVP = DEFAULT_CONFIG.positionMCPVP;
+        TiersClient.activeMCPVPMode = DEFAULT_CONFIG.activeMCPVPMode;
 
         config = DEFAULT_CONFIG;
         saveConfig();

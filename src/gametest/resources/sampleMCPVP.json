@@ -1,0 +1,37 @@
+{
+  "name": "XTki4ler",
+  "region": null,
+  "points": 265,
+  "points_exact": "265.5",
+  "overall": 0,
+  "overall_tier": "HT2",
+  "rankings": {
+    "uhc": {
+      "code": "MT1"
+    },
+    "shield": {
+      "code": "LT1"
+    },
+    "early_game": {
+      "code": "HT2"
+    },
+    "diamond_smp": {
+      "code": "HT2"
+    },
+    "late_game": {
+      "code": "HT2"
+    },
+    "cart": {
+      "code": "HT2"
+    },
+    "mace": {
+      "code": "LT2"
+    },
+    "spear": {
+      "code": "LT2"
+    },
+    "end_game": {
+      "code": "MT3"
+    }
+  }
+}

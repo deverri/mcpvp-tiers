@@ -40,7 +40,24 @@ public enum Mode {
     SUBTIERS_BOW(Category.SUBTIERS, "\uF008", "Bow"),
     SUBTIERS_BED(Category.SUBTIERS, "\uF009", "Bed"),
     SUBTIERS_OG_VANILLA(Category.SUBTIERS, "\uF00A", "OG Vanilla"),
-    SUBTIERS_TRIDENT(Category.SUBTIERS, "\uF00B", "Trident");
+    SUBTIERS_TRIDENT(Category.SUBTIERS, "\uF00B", "Trident"),
+
+    MCPVP_SWORD(Category.MCPVP, "\uF000", "Sword"),
+    MCPVP_SHIELD(Category.MCPVP, "\uF001", "Shield"),
+    MCPVP_POT(Category.MCPVP, "\uF002", "Pot"),
+    MCPVP_EARLY_GAME(Category.MCPVP, "\uF003", "Early Game"),
+    MCPVP_END_GAME(Category.MCPVP, "\uF004", "End Game"),
+    MCPVP_MACE(Category.MCPVP, "\uF005", "Mace"),
+    MCPVP_LATE_GAME(Category.MCPVP, "\uF006", "Late Game"),
+    MCPVP_SMP(Category.MCPVP, "\uF007", "SMP"),
+    MCPVP_CART(Category.MCPVP, "\uF008", "Cart"),
+    MCPVP_CREEPER(Category.MCPVP, "\uF009", "Creeper"),
+    MCPVP_SPEAR(Category.MCPVP, "\uF00A", "Spear"),
+    MCPVP_BOW(Category.MCPVP, "\uF00B", "Bow"),
+    MCPVP_CRYSTAL(Category.MCPVP, "\uF00C", "Crystal"),
+    MCPVP_DIAMOND_SMP(Category.MCPVP, "\uF00D", "Diamond SMP"),
+    MCPVP_NETHERITE_POT(Category.MCPVP, "\uF00E", "Netherite Pot"),
+    MCPVP_UHC(Category.MCPVP, "\uF00F", "UHC");
 
     private final Category category;
     private final String unicode;
@@ -55,7 +72,8 @@ public enum Mode {
     public enum Category {
         MCTIERS,
         PVPTIERS,
-        SUBTIERS
+        SUBTIERS,
+        MCPVP
     }
 
     public Component getIcon() {
@@ -63,6 +81,7 @@ public enum Mode {
             case MCTIERS -> Icons.identifierMCTiers;
             case PVPTIERS -> Icons.identifierPvPTiers;
             case SUBTIERS -> Icons.identifierSubtiers;
+            case MCPVP -> Icons.identifierMCPVP;
         };
         return Component.literal(unicode).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(identifier)).withColor(CommonColors.WHITE));
     }
@@ -72,6 +91,7 @@ public enum Mode {
             case MCTIERS -> Icons.identifierMCTiersTags;
             case PVPTIERS -> Icons.identifierPvPTiersTags;
             case SUBTIERS -> Icons.identifierSubtiersTags;
+            case MCPVP -> Icons.identifierMCPVPTags;
         };
         return Component.literal(unicode).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(identifier)).withColor(CommonColors.WHITE));
     }
@@ -90,5 +110,13 @@ public enum Mode {
 
     public static Mode[] getSubtiersValues() {
         return Arrays.stream(values()).filter(mode -> mode.toString().contains("SUBTIERS")).toArray(Mode[]::new);
+    }
+
+    public static Mode[] getMCPVPValues() {
+        return Arrays.stream(values()).filter(mode -> mode.category == Category.MCPVP).toArray(Mode[]::new);
+    }
+
+    public Category getCategory() {
+        return category;
     }
 }

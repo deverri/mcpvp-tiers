@@ -30,15 +30,19 @@ public class SuperProfile {
     public static final AtomicInteger MCTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger PvPTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger SubtiersRequests = new AtomicInteger(0);
+    public static final AtomicInteger MCPVPRequests = new AtomicInteger(0);
     public static final AtomicInteger failedMCTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger failedPvPTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger failedSubtiersRequests = new AtomicInteger(0);
+    public static final AtomicInteger failedMCPVPRequests = new AtomicInteger(0);
     public static final AtomicInteger failedMCTiersRequestsLastMinute = new AtomicInteger(0);
     public static final AtomicInteger failedPvPTiersRequestsLastMinute = new AtomicInteger(0);
     public static final AtomicInteger failedSubtiersRequestsLastMinute = new AtomicInteger(0);
+    public static final AtomicInteger failedMCPVPRequestsLastMinute = new AtomicInteger(0);
     public static boolean isMCTiersDown = false;
     public static boolean isPvPTiersDown = false;
     public static boolean isSubtiersDown = false;
+    public static boolean isMCPVPDown = false;
     public static int numberOfMessages;
 
     public Status status = Status.SEARCHING;
@@ -71,6 +75,8 @@ public class SuperProfile {
             PvPTiersRequests.incrementAndGet();
         if (this instanceof SubtiersProfile)
             SubtiersRequests.incrementAndGet();
+        if (this instanceof MCPVPProfile)
+            MCPVPRequests.incrementAndGet();
     }
 
     static {
@@ -82,12 +88,14 @@ public class SuperProfile {
         isMCTiersDown = failedMCTiersRequestsLastMinute.get() > 3;
         isPvPTiersDown = failedPvPTiersRequestsLastMinute.get() > 3;
         isSubtiersDown = failedSubtiersRequestsLastMinute.get() > 3;
+        isMCPVPDown = failedMCPVPRequestsLastMinute.get() > 3;
     }
 
     private static void updateAndRecoverFailedRequests() {
         failedMCTiersRequestsLastMinute.set(0);
         failedPvPTiersRequestsLastMinute.set(0);
         failedSubtiersRequestsLastMinute.set(0);
+        failedMCPVPRequestsLastMinute.set(0);
 
         for (SuperProfile superProfile : SuperProfile.failedSuperProfiles) {
             if (superProfile instanceof MCTiersProfile && isMCTiersDown)
@@ -95,6 +103,8 @@ public class SuperProfile {
             if (superProfile instanceof PvPTiersProfile && isPvPTiersDown)
                 continue;
             if (superProfile instanceof SubtiersProfile && isSubtiersDown)
+                continue;
+            if (superProfile instanceof MCPVPProfile && isMCPVPDown)
                 continue;
 
             SuperProfile.failedSuperProfiles.remove(superProfile);
@@ -124,6 +134,10 @@ public class SuperProfile {
             SubtiersRequests.incrementAndGet();
             failedSubtiersRequests.decrementAndGet();
         }
+        if (this instanceof MCPVPProfile) {
+            MCPVPRequests.incrementAndGet();
+            failedMCPVPRequests.decrementAndGet();
+        }
     }
 
     public void buildRequest(String apiUrl, String uuid, String extra) {
@@ -150,6 +164,11 @@ public class SuperProfile {
                 failedRequest();
                 return;
             }
+            case MCPVPProfile _ when failedMCPVPRequestsLastMinute.get() > 8 -> {
+                status = Status.API_ISSUE;
+                failedRequest();
+                return;
+            }
             default -> {
             }
         }
@@ -169,7 +188,7 @@ public class SuperProfile {
                 .GET()
                 .build();
 
-        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
+        client().sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
             int statusCode = response.statusCode();
             if (statusCode == 404) {
                 status = Status.NOT_EXISTING;
@@ -261,7 +280,17 @@ public class SuperProfile {
         return highest;
     }
 
-    private Component getRegionText() {
+    /** HTTP client used for this tierlist's requests. Overridden by tierlists that need e.g. redirect following. */
+    protected java.net.http.HttpClient client() {
+        return httpClient;
+    }
+
+    /** Whether this tierlist publishes a player region (MCPVP does not). */
+    public boolean hasRegion() {
+        return true;
+    }
+
+    protected Component getRegionText() {
         if (region.equalsIgnoreCase("EU"))
             return Icons.colorText(region, "eu");
         else if (region.equalsIgnoreCase("NA"))
@@ -281,7 +310,7 @@ public class SuperProfile {
         return Icons.colorText("Unknown", "unknown");
     }
 
-    private Component getRegionTooltip() {
+    protected Component getRegionTooltip() {
         if (region.equalsIgnoreCase("EU"))
             return Icons.colorText("Europe", "eu");
         else if (region.equalsIgnoreCase("NA"))
@@ -301,7 +330,7 @@ public class SuperProfile {
         return Icons.colorText("Unknown", "unknown");
     }
 
-    private Component getOverallText() {
+    protected Component getOverallText() {
         String positionString = "#" + overallPosition;
         if (!(this instanceof PvPTiersProfile) && points >= 250) return Icons.colorText(positionString, "master");
         else if (this instanceof PvPTiersProfile && points >= 200) return Icons.colorText(positionString, "master");
@@ -313,7 +342,7 @@ public class SuperProfile {
         return Icons.colorText(positionString, "rookie");
     }
 
-    private Component getOverallTooltip() {
+    protected Component getOverallTooltip() {
         String overallTooltip = "Combat ";
 
         if (this instanceof SubtiersProfile)
@@ -349,6 +378,11 @@ public class SuperProfile {
                 if (failedSubtiersRequests.incrementAndGet() % 20 == 0)
                     message = "[Tiers] Subtiers might be down. " + failedSubtiersRequests + " searches (out of " + SubtiersRequests + ") failed so far. Use '/tiers -status' for more info";
             }
+            if (this instanceof MCPVPProfile) {
+                failedMCPVPRequestsLastMinute.incrementAndGet();
+                if (failedMCPVPRequests.incrementAndGet() % 20 == 0)
+                    message = "[Tiers] MCPVP might be down. " + failedMCPVPRequests + " searches (out of " + MCPVPRequests + ") failed so far. Use '/tiers -status' for more info";
+            }
         }
 
         failedSuperProfiles.add(this);
@@ -379,6 +413,10 @@ public class SuperProfile {
             message[0] = "Subtiers might be down";
             message[1] = failedSubtiersRequests + " searches (out of " + SubtiersRequests + " profiles) failed so far";
         }
+        if (this instanceof MCPVPProfile) {
+            message[0] = "MCPVP might be down";
+            message[1] = failedMCPVPRequests + " searches (out of " + MCPVPRequests + " profiles) failed so far";
+        }
 
         message[2] = "Tiers will automatically try to update failed requests";
         return message;
@@ -392,6 +430,8 @@ public class SuperProfile {
             failedPvPTiersRequests.set(0);
             SubtiersRequests.set(0);
             failedSubtiersRequests.set(0);
+            MCPVPRequests.set(0);
+            failedMCPVPRequests.set(0);
         }
     }
 

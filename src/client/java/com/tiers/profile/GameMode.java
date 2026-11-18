@@ -35,7 +35,45 @@ public class GameMode {
         this.parsingName = parsingName;
     }
 
+    /**
+     * Tierlists that publish a ready-made tier code (e.g. MCPVP's "MT2" or "LT6") instead of
+     * the tier + pos pair used by MCTiers / PvPTiers / Subtiers. Order: best first.
+     */
+    private static final java.util.List<String> CODE_TIER_ORDER = java.util.List.of(
+            "HT1", "MT1", "LT1", "HT2", "MT2", "LT2", "HT3", "MT3", "LT3",
+            "HT4", "MT4", "LT4", "HT5", "MT5", "LT5", "HT6", "MT6", "LT6", "ST6");
+    private boolean codeBased;
+
+    private void parseTierCode(String code) {
+        codeBased = true;
+        code = code.toUpperCase(Locale.ROOT).trim();
+        if (!CODE_TIER_ORDER.contains(code)) {
+            status = Status.NOT_EXISTING;
+            return;
+        }
+
+        tier = code.substring(2);
+        peakTier = tier;
+        displayedTierUnformatted = code;
+        displayedTier = Component.literal(code).setStyle(Style.EMPTY.withColor(getTierColor(code)));
+
+        String level = switch (code.charAt(0)) {
+            case 'H' -> "High ";
+            case 'M' -> "Mid ";
+            case 'L' -> "Low ";
+            default -> "Sub ";
+        };
+        tierTooltip = Component.literal(level + "Tier " + tier + " (" + code + ")").setStyle(displayedTier.getStyle());
+        hasPeak = false;
+        status = Status.READY;
+    }
+
     public void parseTiers(JsonObject jsonObject) {
+        if (jsonObject.has("code") && !jsonObject.get("code").isJsonNull()) {
+            parseTierCode(jsonObject.get("code").getAsString());
+            return;
+        }
+
         String pos;
         String peakPos;
         String retired;
@@ -114,6 +152,8 @@ public class GameMode {
 
     public int getTierPoints(boolean peak) {
         if (status == Status.NOT_EXISTING) return 0;
+        if (codeBased) // No official per-kit points: rank by position in the tier ladder (only compared within one tierlist)
+            return displayedTierUnformatted == null ? 0 : CODE_TIER_ORDER.size() - CODE_TIER_ORDER.indexOf(displayedTierUnformatted);
         String tier = displayedTierUnformatted;
         if (peak)
             tier = displayedPeakTierUnformatted;
@@ -145,6 +185,8 @@ public class GameMode {
     }
 
     private int getTierColor(String tier) {
+        if (gamemode.getCategory() == Mode.Category.MCPVP)
+            return ColorControl.getColor("mcpvp_" + tier.toLowerCase(Locale.ROOT));
         if (tier.contains("R"))
             return ColorControl.getColor("retired");
         return ColorControl.getColor(tier.toLowerCase(Locale.ROOT));
